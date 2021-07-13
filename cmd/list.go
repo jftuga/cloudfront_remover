@@ -65,7 +65,6 @@ func listAllDistributions(args []string) {
 	table.Render()
 }
 
-
 func getDistributionSummary() [][]string {
 	var data [][]string
 	svc := cloudfront.New(session.New())
@@ -88,7 +87,7 @@ func getDistributionSummary() [][]string {
 		return [][]string{}
 	}
 
-	for _, obj := range result.DistributionList.Items  {
+	for _, obj := range result.DistributionList.Items {
 		alias := "N/A"
 		if len(obj.Aliases.Items) > 0 {
 			alias = *obj.Aliases.Items[0]
@@ -106,8 +105,8 @@ func getDistributionSummary() [][]string {
 			}
 		}
 
-		item := []string{comment, alias  ,*obj.Id, getETag(*obj.Id), origin}
-		data = append(data,item)
+		item := []string{comment, alias, *obj.Id, getETag(*obj.Id), origin}
+		data = append(data, item)
 	}
 	return data
 }
