@@ -2,6 +2,7 @@ package cfOps
 
 import (
 	"fmt"
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudfront"
@@ -355,7 +356,10 @@ func DistIsEnabled(distributionId string) bool {
 }
 
 func OAIBucketSearch(oaiId, searchRegion string) {
-	svc := s3.New(session.New())
+	sess, err := session.NewSession(&aws.Config{
+		Region: aws.String(searchRegion),
+	})
+	svc := s3.New(sess)
 	input := &s3.ListBucketsInput{}
 
 	result, err := svc.ListBuckets(input)
