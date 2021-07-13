@@ -61,6 +61,39 @@ func GetDistributionData() [][]string {
 	return data
 }
 
+func GetOAIs() [][]string {
+	var data [][]string
+	svc := cloudfront.New(session.New())
+	input := &cloudfront.ListCloudFrontOriginAccessIdentitiesInput{}
+
+	result, err := svc.ListCloudFrontOriginAccessIdentities(input)
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			case cloudfront.ErrCodeInvalidArgument:
+				fmt.Println(cloudfront.ErrCodeInvalidArgument, aerr.Error())
+			default:
+				fmt.Println(aerr.Error())
+			}
+		} else {
+			// Print the error, cast err to awserr.Error to get the Code and
+			// Message from an error.
+			fmt.Println(err.Error())
+		}
+		return [][]string{}
+	}
+
+	for _, obj := range result.CloudFrontOriginAccessIdentityList.Items {
+		comment := "N/A"
+		if len(*obj.Comment) > 0 {
+			comment = *obj.Comment
+		}
+		item := []string{*obj.Id, comment}
+		data = append(data,item)
+	}
+	return data
+}
+
 // GetETag - given a CF Dist ID, return its ETag value
 func GetETag(distributionId string) string {
 	svc := cloudfront.New(session.New())
@@ -88,14 +121,14 @@ func GetETag(distributionId string) string {
 	return *result.ETag
 }
 
-func DeleteDistribution(distributionId string) {
+func DeleteDistribution(distributionId string) string {
 	input := cloudfront.DeleteDistributionInput{}
 	input.Id = &distributionId
 	etag := GetETag(distributionId)
 	input.IfMatch = &etag
 
 	svc := cloudfront.New(session.New())
-	result, err := svc.DeleteDistribution(&input)
+	_, err := svc.DeleteDistribution(&input)
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {
@@ -117,10 +150,9 @@ func DeleteDistribution(distributionId string) {
 			// Message from an error.
 			fmt.Println(err.Error())
 		}
-		return
+		return err.Error()
 	}
-
-	fmt.Println(result)
+	return ""
 }
 
 func DisableDistribution(distributionId string) {
@@ -256,4 +288,9 @@ func GetDistConf(distributionId string) *cloudfront.DistributionConfig {
 	}
 	//fmt.Println(result)
 	return result.DistributionConfig
+}
+
+func DistIsEnabled(distributionId string) bool {
+	conf := GetDistConf(distributionId)
+	return *conf.Enabled
 }

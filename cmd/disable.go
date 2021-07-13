@@ -22,6 +22,7 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"fmt"
 	"github.com/jftuga/wipeout_cloudfront/cfOps"
 	"github.com/spf13/cobra"
 )
@@ -43,5 +44,6 @@ func init() {
 }
 
 func disableCFDistribution(distributionId string) {
+	fmt.Printf("Disabling distribution: %s\n", distributionId)
 	cfOps.DisableDistribution(distributionId)
 }

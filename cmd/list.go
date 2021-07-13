@@ -34,7 +34,7 @@ var listCmd = &cobra.Command{
 	Short: "List distributions and their OAIs",
 
 	Run: func(cmd *cobra.Command, args []string) {
-		listAllDistributions(args)
+		listAllDistributions()
 	},
 }
 
@@ -42,7 +42,7 @@ func init() {
 	rootCmd.AddCommand(listCmd)
 }
 
-func listAllDistributions(args []string) {
+func listAllDistributions() {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"ID", "ETAG", "ENABLED", "STATUS", "1ST ALIAS", "1ST OAI", "COMMENT"})
 	data := cfOps.GetDistributionData()

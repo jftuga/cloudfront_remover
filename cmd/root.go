@@ -31,7 +31,7 @@ var cfgFile string
 var rootCmd = &cobra.Command{
 	Use:   "wipeout_cloudfront",
 	Short: "Disable and then delete AWS CloudFront Distributions and associated OAIs",
-	Long:  "wipeout_cloudfront\n" +
+	Long: "wipeout_cloudfront\n" +
 		"Disable and then delete AWS CloudFront Distributions and associated OAIs\n\n" +
 		"Set the AWS_PROFILE environment variable to use a different profile from the AWS credential file\n",
 }
@@ -45,4 +45,3 @@ func Execute() {
 func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.wipeout_cloudfront.yaml)")
 }
-

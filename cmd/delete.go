@@ -22,8 +22,11 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"fmt"
 	"github.com/jftuga/wipeout_cloudfront/cfOps"
 	"github.com/spf13/cobra"
+	"strings"
+	"time"
 )
 
 var deleteDistID string = ""
@@ -43,5 +46,21 @@ func init() {
 }
 
 func deleteCFDistribution(distributionId string) {
-	cfOps.DeleteDistribution(distributionId)
+	if cfOps.DistIsEnabled(distributionId) {
+		fmt.Printf("Disabling distribution: %s\n", distributionId)
+		cfOps.DisableDistribution(distributionId)
+		time.Sleep(5 * time.Second)
+	}
+
+	fmt.Printf("Deleting distribution: %s\n", distributionId)
+	for {
+		result := cfOps.DeleteDistribution(distributionId)
+		if strings.Contains(result, "trying to delete has not been disabled") {
+			fmt.Println(result)
+			fmt.Println("Will try again in 5 seconds...")
+			time.Sleep(5 * time.Second)
+			continue
+		}
+		break
+	}
 }
