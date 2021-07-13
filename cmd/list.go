@@ -22,10 +22,7 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"fmt"
-	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/cloudfront"
+	"github.com/jftuga/wipeout_cloudfront/cfOps"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"os"
@@ -47,82 +44,10 @@ func init() {
 
 func listAllDistributions(args []string) {
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Comment", "1st alias", "Id", "ETag", "1st OAI"})
-	data := getDistributionSummary()
+	table.SetHeader([]string{"ID", "ETAG", "ENABLED", "STATUS", "1ST ALIAS", "1ST OAI", "COMMENT"})
+	data := cfOps.GetDistributionData()
 	for _, entry := range data {
 		table.Append(entry)
 	}
 	table.Render()
-}
-
-func getDistributionSummary() [][]string {
-	var data [][]string
-	svc := cloudfront.New(session.New())
-	input := &cloudfront.ListDistributionsInput{}
-
-	result, err := svc.ListDistributions(input)
-	if err != nil {
-		if aerr, ok := err.(awserr.Error); ok {
-			switch aerr.Code() {
-			case cloudfront.ErrCodeInvalidArgument:
-				fmt.Println(cloudfront.ErrCodeInvalidArgument, aerr.Error())
-			default:
-				fmt.Println(aerr.Error())
-			}
-		} else {
-			// Print the error, cast err to awserr.Error to get the Code and
-			// Message from an error.
-			fmt.Println(err.Error())
-		}
-		return [][]string{}
-	}
-
-	for _, obj := range result.DistributionList.Items {
-		alias := "N/A"
-		if len(obj.Aliases.Items) > 0 {
-			alias = *obj.Aliases.Items[0]
-		}
-
-		comment := "N/A"
-		if len(*obj.Comment) > 0 {
-			comment = *obj.Comment
-		}
-
-		origin := "N/A"
-		if len(obj.Origins.Items) > 0 {
-			if obj.Origins.Items[0].S3OriginConfig != nil {
-				origin = *obj.Origins.Items[0].S3OriginConfig.OriginAccessIdentity
-			}
-		}
-
-		item := []string{comment, alias, *obj.Id, getETag(*obj.Id), origin}
-		data = append(data, item)
-	}
-	return data
-}
-
-func getETag(distributionId string) string {
-	svc := cloudfront.New(session.New())
-	input := &cloudfront.GetDistributionInput{}
-	input.SetId(distributionId)
-
-	result, err := svc.GetDistribution(input)
-	if err != nil {
-		if aerr, ok := err.(awserr.Error); ok {
-			switch aerr.Code() {
-			case cloudfront.ErrCodeNoSuchDistribution:
-				fmt.Println(cloudfront.ErrCodeNoSuchDistribution, aerr.Error())
-			case cloudfront.ErrCodeAccessDenied:
-				fmt.Println(cloudfront.ErrCodeAccessDenied, aerr.Error())
-			default:
-				fmt.Println(aerr.Error())
-			}
-		} else {
-			// Print the error, cast err to awserr.Error to get the Code and
-			// Message from an error.
-			fmt.Println(err.Error())
-		}
-		return "N/A"
-	}
-	return *result.ETag
 }
