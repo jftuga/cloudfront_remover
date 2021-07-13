@@ -57,7 +57,7 @@ func init() {
 
 func listAllDistributions(args []string) {
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Comment", "1st alias", "Id", "ETag"})
+	table.SetHeader([]string{"Comment", "1st alias", "Id", "ETag", "1st OAI"})
 	data := getDistributionSummary()
 	for _, entry := range data {
 		table.Append(entry)
@@ -98,7 +98,18 @@ func getDistributionSummary() [][]string {
 		if len(*obj.Comment) > 0 {
 			comment = *obj.Comment
 		}
-		item := []string{comment, alias  ,*obj.Id, getETag(*obj.Id)}
+		if comment == "terraform--codershowcase.com" {
+			fmt.Println("debug")
+		}
+
+		origin := "N/A"
+		if len(obj.Origins.Items) > 0 {
+			if obj.Origins.Items[0].S3OriginConfig != nil {
+				origin = *obj.Origins.Items[0].S3OriginConfig.OriginAccessIdentity
+			}
+		}
+
+		item := []string{comment, alias  ,*obj.Id, getETag(*obj.Id), origin}
 		data = append(data,item)
 	}
 	return data
