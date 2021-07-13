@@ -26,20 +26,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var distID string = ""
+var disableDistID string = ""
 
 // disableCmd represents the disable command
 var disableCmd = &cobra.Command{
 	Use:   "disable",
 	Short: "Disable a CloudFront Distribution",
 	Run: func(cmd *cobra.Command, args []string) {
-		disableCFDistribution(distID)
+		disableCFDistribution(disableDistID)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(disableCmd)
-	disableCmd.Flags().StringVarP(&distID, "id", "i", "", "CloudFront Distribution ID")
+	disableCmd.Flags().StringVarP(&disableDistID, "id", "i", "", "Disable CloudFront Distribution ID")
 }
 
 func disableCFDistribution(distributionId string) {

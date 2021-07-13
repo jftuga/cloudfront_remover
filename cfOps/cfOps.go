@@ -88,6 +88,41 @@ func GetETag(distributionId string) string {
 	return *result.ETag
 }
 
+func DeleteDistribution(distributionId string) {
+	input := cloudfront.DeleteDistributionInput{}
+	input.Id = &distributionId
+	etag := GetETag(distributionId)
+	input.IfMatch = &etag
+
+	svc := cloudfront.New(session.New())
+	result, err := svc.DeleteDistribution(&input)
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			case cloudfront.ErrCodeAccessDenied:
+				fmt.Println(cloudfront.ErrCodeAccessDenied, aerr.Error())
+			case cloudfront.ErrCodeDistributionNotDisabled:
+				fmt.Println(cloudfront.ErrCodeDistributionNotDisabled, aerr.Error())
+			case cloudfront.ErrCodeInvalidIfMatchVersion:
+				fmt.Println(cloudfront.ErrCodeInvalidIfMatchVersion, aerr.Error())
+			case cloudfront.ErrCodeNoSuchDistribution:
+				fmt.Println(cloudfront.ErrCodeNoSuchDistribution, aerr.Error())
+			case cloudfront.ErrCodePreconditionFailed:
+				fmt.Println(cloudfront.ErrCodePreconditionFailed, aerr.Error())
+			default:
+				fmt.Println(aerr.Error())
+			}
+		} else {
+			// Print the error, cast err to awserr.Error to get the Code and
+			// Message from an error.
+			fmt.Println(err.Error())
+		}
+		return
+	}
+
+	fmt.Println(result)
+}
+
 func DisableDistribution(distributionId string) {
 	svc := cloudfront.New(session.New())
 	conf := GetDistConf(distributionId)
@@ -99,7 +134,7 @@ func DisableDistribution(distributionId string) {
 	etag := GetETag(distributionId)
 	input.IfMatch = &etag
 
-	result, err := svc.UpdateDistribution(input)
+	_, err := svc.UpdateDistribution(input)
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {
@@ -193,9 +228,6 @@ func DisableDistribution(distributionId string) {
 		}
 		return
 	}
-
-	fmt.Println(result)
-
 }
 
 // GetDistConf- return a Distribution config for the given ID
