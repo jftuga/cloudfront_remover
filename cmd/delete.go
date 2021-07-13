@@ -54,9 +54,9 @@ func deleteCFDistribution(distributionId string) {
 
 	fmt.Printf("Deleting distribution: %s\n", distributionId)
 	for {
-		result := cfOps.DeleteDistribution(distributionId)
-		if strings.Contains(result, "trying to delete has not been disabled") {
-			fmt.Println(result)
+		deleteResult := cfOps.DeleteDistribution(distributionId)
+		if strings.Contains(deleteResult, "trying to delete has not been disabled") {
+			fmt.Println(deleteResult)
 			fmt.Println("Will try again in 5 seconds...")
 			time.Sleep(5 * time.Second)
 			continue

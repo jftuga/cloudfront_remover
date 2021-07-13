@@ -22,36 +22,28 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"fmt"
-
+	"github.com/jftuga/wipeout_cloudfront/cfOps"
 	"github.com/spf13/cobra"
 )
+
+var searchOAIid string = ""
+var searchRegion string = ""
 
 // s3checkCmd represents the s3check command
 var s3checkCmd = &cobra.Command{
 	Use:   "s3check",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Search for OAI in S3 bucket permissions",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("s3check called")
+		bucketOAISearch(searchOAIid, searchRegion)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(s3checkCmd)
+	s3checkCmd.Flags().StringVarP(&searchOAIid, "id", "i", "", "CloudFront OAI")
+	s3checkCmd.Flags().StringVarP(&searchRegion, "region", "r", "", "AWS Region")
+}
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// s3checkCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// s3checkCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+func bucketOAISearch(oaiId, searchRegion string) {
+	cfOps.OAIBucketSearch(oaiId, searchRegion)
 }
