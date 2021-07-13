@@ -88,10 +88,36 @@ func GetOAIs() [][]string {
 		if len(*obj.Comment) > 0 {
 			comment = *obj.Comment
 		}
-		item := []string{*obj.Id, comment}
+		item := []string{*obj.Id, GetOAIETag(*obj.Id), comment}
 		data = append(data,item)
 	}
 	return data
+}
+
+func GetOAIETag(oaiId string) string {
+	svc := cloudfront.New(session.New())
+	input := &cloudfront.GetCloudFrontOriginAccessIdentityInput{}
+	input.SetId(oaiId)
+
+	result, err := svc.GetCloudFrontOriginAccessIdentity(input)
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			case cloudfront.ErrCodeNoSuchCloudFrontOriginAccessIdentity:
+				fmt.Println(cloudfront.ErrCodeNoSuchCloudFrontOriginAccessIdentity, aerr.Error())
+			case cloudfront.ErrCodeAccessDenied:
+				fmt.Println(cloudfront.ErrCodeAccessDenied, aerr.Error())
+			default:
+				fmt.Println(aerr.Error())
+			}
+		} else {
+			// Print the error, cast err to awserr.Error to get the Code and
+			// Message from an error.
+			fmt.Println(err.Error())
+		}
+		return "N/A"
+	}
+	return *result.ETag
 }
 
 // GetETag - given a CF Dist ID, return its ETag value
@@ -119,6 +145,39 @@ func GetETag(distributionId string) string {
 		return "N/A"
 	}
 	return *result.ETag
+}
+
+func DeleteOAI(oaiId string) {
+	svc := cloudfront.New(session.New())
+	input := cloudfront.DeleteCloudFrontOriginAccessIdentityInput{}
+	input.SetId(oaiId)
+	etag := GetOAIETag(oaiId)
+	input.IfMatch = &etag
+
+	_, err := svc.DeleteCloudFrontOriginAccessIdentity(&input)
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			case cloudfront.ErrCodeAccessDenied:
+				fmt.Println(cloudfront.ErrCodeAccessDenied, aerr.Error())
+			case cloudfront.ErrCodeInvalidIfMatchVersion:
+				fmt.Println(cloudfront.ErrCodeInvalidIfMatchVersion, aerr.Error())
+			case cloudfront.ErrCodeNoSuchCloudFrontOriginAccessIdentity:
+				fmt.Println(cloudfront.ErrCodeNoSuchCloudFrontOriginAccessIdentity, aerr.Error())
+			case cloudfront.ErrCodePreconditionFailed:
+				fmt.Println(cloudfront.ErrCodePreconditionFailed, aerr.Error())
+			case cloudfront.ErrCodeOriginAccessIdentityInUse:
+				fmt.Println(cloudfront.ErrCodeOriginAccessIdentityInUse, aerr.Error())
+			default:
+				fmt.Println(aerr.Error())
+			}
+		} else {
+			// Print the error, cast err to awserr.Error to get the Code and
+			// Message from an error.
+			fmt.Println(err.Error())
+		}
+		return
+	}
 }
 
 func DeleteDistribution(distributionId string) string {
