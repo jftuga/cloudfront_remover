@@ -98,9 +98,6 @@ func getDistributionSummary() [][]string {
 		if len(*obj.Comment) > 0 {
 			comment = *obj.Comment
 		}
-		if comment == "terraform--codershowcase.com" {
-			fmt.Println("debug")
-		}
 
 		origin := "N/A"
 		if len(obj.Origins.Items) > 0 {
