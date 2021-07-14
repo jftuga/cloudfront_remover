@@ -29,9 +29,9 @@ import (
 var searchOAIid string = ""
 var searchRegion string = ""
 
-// s3checkCmd represents the s3check command
-var s3checkCmd = &cobra.Command{
-	Use:   "s3check",
+// s3searchCmd represents the s3search command
+var s3searchCmd = &cobra.Command{
+	Use:   "s3search",
 	Short: "Search for OAI in S3 bucket permissions",
 	Run: func(cmd *cobra.Command, args []string) {
 		bucketOAISearch(searchOAIid, searchRegion)
@@ -39,9 +39,9 @@ var s3checkCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(s3checkCmd)
-	s3checkCmd.Flags().StringVarP(&searchOAIid, "id", "i", "", "CloudFront OAI")
-	s3checkCmd.Flags().StringVarP(&searchRegion, "region", "r", "", "AWS Region")
+	rootCmd.AddCommand(s3searchCmd)
+	s3searchCmd.Flags().StringVarP(&searchOAIid, "id", "i", "", "CloudFront OAI")
+	s3searchCmd.Flags().StringVarP(&searchRegion, "region", "r", "", "AWS Region")
 }
 
 func bucketOAISearch(oaiId, searchRegion string) {

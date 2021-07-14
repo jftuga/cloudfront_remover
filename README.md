@@ -19,5 +19,5 @@ Available Commands:
   help        Help about any command
   list        List distributions and their OAIs
   listOAI     List CloudFront Origin Access Identities (OAIs)
-  s3check     Search for OAI in S3 bucket permissions
+  s3search    Search for OAI in S3 bucket permissions
 ```
