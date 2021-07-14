@@ -21,7 +21,7 @@ THE SOFTWARE.
 */
 package main
 
-import "github.com/jftuga/wipeout_cloudfront/cmd"
+import "github.com/jftuga/cloudfront_remover/cmd"
 
 func main() {
 	cmd.Execute()

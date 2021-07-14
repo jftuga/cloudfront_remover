@@ -22,7 +22,7 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"github.com/jftuga/wipeout_cloudfront/cfOps"
+	"github.com/jftuga/cloudfront_remover/cfOps"
 	"github.com/spf13/cobra"
 )
 

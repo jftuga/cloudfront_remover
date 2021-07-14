@@ -1,15 +1,15 @@
-# wipeout_cloudfront
+# cloudfront_remover
 Disable and then delete CloudFront Distributions and OAIs
 
 ## Usage
 ```
-wipeout_cloudfront
+cloudfront_remover
 Disable and then delete AWS CloudFront Distributions and associated OAIs
 
 Set the AWS_PROFILE environment variable to use a different profile from the AWS credential file
 
 Usage:
-  wipeout_cloudfront [command]
+  cloudfront_remover [command]
 
 Available Commands:
   completion  generate the autocompletion script for the specified shell

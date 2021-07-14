@@ -23,10 +23,11 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/jftuga/wipeout_cloudfront/cfOps"
-	"github.com/spf13/cobra"
 	"strings"
 	"time"
+
+	"github.com/jftuga/cloudfront_remover/cfOps"
+	"github.com/spf13/cobra"
 )
 
 var deleteDistID string = ""

@@ -29,9 +29,9 @@ var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "wipeout_cloudfront",
+	Use:   "cloudfront_remover",
 	Short: "Disable and then delete AWS CloudFront Distributions and associated OAIs",
-	Long: "wipeout_cloudfront\n" +
+	Long: "cloudfront_remover\n" +
 		"Disable and then delete AWS CloudFront Distributions and associated OAIs\n\n" +
 		"Set the AWS_PROFILE environment variable to use a different profile from the AWS credential file\n",
 }
@@ -40,8 +40,4 @@ var rootCmd = &cobra.Command{
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	cobra.CheckErr(rootCmd.Execute())
-}
-
-func init() {
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.wipeout_cloudfront.yaml)")
 }

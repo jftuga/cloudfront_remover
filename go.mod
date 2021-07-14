@@ -1,4 +1,4 @@
-module github.com/jftuga/wipeout_cloudfront
+module github.com/jftuga/cloudfront_remover
 
 go 1.16
 

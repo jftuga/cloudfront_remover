@@ -22,10 +22,11 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"github.com/jftuga/wipeout_cloudfront/cfOps"
+	"os"
+
+	"github.com/jftuga/cloudfront_remover/cfOps"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 // listCmd represents the list command
