@@ -11,6 +11,7 @@ build:
   goarch:
     - amd64
     - arm
+    - arm64
   goarm:
       - 7
   ignore:
@@ -20,6 +21,8 @@ build:
     - goos: windows
       goarch: arm
       goarm: 6
+    - goos: linux
+      goarch: arm64
 archives:
     - name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ .Arm }}"
       format: tar.xz
