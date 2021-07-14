@@ -22,6 +22,7 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"fmt"
 	"github.com/spf13/cobra"
 )
 
@@ -33,11 +34,16 @@ var rootCmd = &cobra.Command{
 	Short: "Disable and then delete AWS CloudFront Distributions and associated OAIs",
 	Long: "cloudfront_remover\n" +
 		"Disable and then delete AWS CloudFront Distributions and associated OAIs\n\n" +
-		"Set the AWS_PROFILE environment variable to use a different profile from the AWS credential file\n",
+		"Set the AWS_PROFILE environment variable to use a different profile from the AWS credential file.\n",
+	Version: pgmVersion,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	cobra.CheckErr(rootCmd.Execute())
+}
+func init() {
+	versionTemplate := fmt.Sprintf("%s v%s\n%s\n", pgmName, pgmVersion, pgmURL)
+	rootCmd.SetVersionTemplate(versionTemplate)
 }

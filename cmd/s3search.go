@@ -45,12 +45,14 @@ var s3searchCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(s3searchCmd)
 	s3searchCmd.Flags().StringVarP(&searchOAIid, "id", "i", "", "CloudFront OAI")
-	s3searchCmd.Flags().StringVarP(&searchRegion, "region", "r", "", "AWS Region")
+	s3searchCmd.Flags().StringVarP(&searchRegion, "region", "r", "us-east-1", "AWS Region hint; all regions will be searched")
+	s3searchCmd.MarkFlagRequired("id")
+	//s3searchCmd.MarkFlagRequired("region")
 }
 
 func outputResults(searchResults [][]string) {
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"BUCKET", "OAI"})
+	table.SetHeader([]string{"BUCKET", "REGION", "OAI"})
 	for _, entry := range searchResults {
 		table.Append(entry)
 	}
@@ -58,12 +60,12 @@ func outputResults(searchResults [][]string) {
 }
 
 func bucketOAISearch(oaiId, searchRegion string) {
-	allBuckets := cfOps.GetRegionBuckets(oaiId, searchRegion)
+	allBuckets := cfOps.GetRegionBuckets(searchRegion)
 	var searchResults [][]string
 	for _, bucket := range allBuckets {
-		policy := cfOps.GetS3Policy(bucket, searchRegion)
+		policy, bucketRegion := cfOps.GetS3Policy(bucket, searchRegion)
 		if strings.Contains(policy, oaiId) {
-			item := []string{bucket, oaiId}
+			item := []string{bucket, bucketRegion, oaiId}
 			searchResults = append(searchResults, item)
 		}
 	}

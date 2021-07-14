@@ -44,6 +44,7 @@ var deleteCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(deleteCmd)
 	deleteCmd.Flags().StringVarP(&deleteDistID, "id", "i", "", "Delete CloudFront Distribution ID")
+	deleteCmd.MarkFlagRequired("id")
 }
 
 func deleteCFDistribution(distributionId string) {

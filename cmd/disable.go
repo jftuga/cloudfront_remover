@@ -42,6 +42,7 @@ var disableCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(disableCmd)
 	disableCmd.Flags().StringVarP(&disableDistID, "id", "i", "", "Disable CloudFront Distribution ID")
+	disableCmd.MarkFlagRequired("id")
 }
 
 func disableCFDistribution(distributionId string) {

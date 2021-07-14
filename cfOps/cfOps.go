@@ -358,7 +358,7 @@ func DistIsEnabled(distributionId string) bool {
 	return *conf.Enabled
 }
 
-func GetRegionBuckets(oaiId, searchRegion string) []string {
+func GetRegionBuckets(searchRegion string) []string {
 	sess, err := session.NewSession(&aws.Config{
 		Region: aws.String(searchRegion),
 	})
@@ -387,9 +387,9 @@ func GetRegionBuckets(oaiId, searchRegion string) []string {
 	return regionBuckets
 }
 
-func GetS3Policy(bucketName, searchRegion string) string {
-	sess0 := session.Must(session.NewSession())
-	bucketRegion, err := s3manager.GetBucketRegion(context.Background(), sess0, bucketName, searchRegion)
+func FindBucketRegion(bucketName, searchRegion string) string {
+	sess := session.Must(session.NewSession())
+	bucketRegion, err := s3manager.GetBucketRegion(context.Background(), sess, bucketName, searchRegion)
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok && aerr.Code() == "NotFound" {
 			fmt.Printf("unable to find bucket %s's region not found\n", bucketName)
@@ -397,7 +397,11 @@ func GetS3Policy(bucketName, searchRegion string) string {
 		fmt.Println(err.Error())
 		return ""
 	}
+	return bucketRegion
+}
 
+func GetS3Policy(bucketName, searchRegion string) (string, string) {
+	bucketRegion := FindBucketRegion(bucketName, searchRegion)
 	sess, err := session.NewSession(&aws.Config{
 		Region: aws.String(bucketRegion),
 	})
@@ -421,7 +425,7 @@ func GetS3Policy(bucketName, searchRegion string) string {
 			// Message from an error.
 			fmt.Println(err.Error())
 		}
-		return ""
+		return "", ""
 	}
-	return *result.Policy
+	return *result.Policy, bucketRegion
 }

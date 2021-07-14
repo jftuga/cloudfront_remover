@@ -42,6 +42,7 @@ var deleteOAICmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(deleteOAICmd)
 	deleteOAICmd.Flags().StringVarP(&deleteOAIid, "id", "i", "", "Delete CloudFront OAI")
+	deleteOAICmd.MarkFlagRequired("id")
 }
 
 func deleteOAI(oaiId string) {
