@@ -1,13 +1,16 @@
 package cfOps
 
 import (
+	"context"
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudfront"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"strconv"
+	"strings"
 )
 
 //This is a simple package to execute a few CloudFront Operations
@@ -91,7 +94,7 @@ func GetOAIs() [][]string {
 			comment = *obj.Comment
 		}
 		item := []string{*obj.Id, GetOAIETag(*obj.Id), comment}
-		data = append(data,item)
+		data = append(data, item)
 	}
 	return data
 }
@@ -355,7 +358,7 @@ func DistIsEnabled(distributionId string) bool {
 	return *conf.Enabled
 }
 
-func OAIBucketSearch(oaiId, searchRegion string) {
+func GetRegionBuckets(oaiId, searchRegion string) []string {
 	sess, err := session.NewSession(&aws.Config{
 		Region: aws.String(searchRegion),
 	})
@@ -374,8 +377,51 @@ func OAIBucketSearch(oaiId, searchRegion string) {
 			// Message from an error.
 			fmt.Println(err.Error())
 		}
-		return
+		return []string{}
 	}
 
-	fmt.Println(result)
+	var regionBuckets []string
+	for _, bucket := range result.Buckets {
+		regionBuckets = append(regionBuckets, *bucket.Name)
+	}
+	return regionBuckets
+}
+
+func GetS3Policy(bucketName, searchRegion string) string {
+	sess0 := session.Must(session.NewSession())
+	bucketRegion, err := s3manager.GetBucketRegion(context.Background(), sess0, bucketName, searchRegion)
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok && aerr.Code() == "NotFound" {
+			fmt.Printf("unable to find bucket %s's region not found\n", bucketName)
+		}
+		fmt.Println(err.Error())
+		return ""
+	}
+
+	sess, err := session.NewSession(&aws.Config{
+		Region: aws.String(bucketRegion),
+	})
+
+	svc := s3.New(sess)
+	input := &s3.GetBucketPolicyInput{
+		Bucket: aws.String(bucketName),
+	}
+
+	result, err := svc.GetBucketPolicy(input)
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			default:
+				if !strings.Contains(aerr.Error(), "NoSuchBucketPolicy") {
+					fmt.Println(aerr.Error())
+				}
+			}
+		} else {
+			// Print the error, cast err to awserr.Error to get the Code and
+			// Message from an error.
+			fmt.Println(err.Error())
+		}
+		return ""
+	}
+	return *result.Policy
 }

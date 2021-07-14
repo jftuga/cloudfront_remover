@@ -22,8 +22,12 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"fmt"
 	"github.com/jftuga/cloudfront_remover/cfOps"
+	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
+	"os"
+	"strings"
 )
 
 var searchOAIid string = ""
@@ -32,7 +36,7 @@ var searchRegion string = ""
 // s3searchCmd represents the s3search command
 var s3searchCmd = &cobra.Command{
 	Use:   "s3search",
-	Short: "Search for OAI in S3 bucket permissions",
+	Short: "Search for an OAI in all S3 bucket policies",
 	Run: func(cmd *cobra.Command, args []string) {
 		bucketOAISearch(searchOAIid, searchRegion)
 	},
@@ -44,6 +48,28 @@ func init() {
 	s3searchCmd.Flags().StringVarP(&searchRegion, "region", "r", "", "AWS Region")
 }
 
+func outputResults(searchResults [][]string) {
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader([]string{"BUCKET", "OAI"})
+	for _, entry := range searchResults {
+		table.Append(entry)
+	}
+	table.Render()
+}
+
 func bucketOAISearch(oaiId, searchRegion string) {
-	cfOps.OAIBucketSearch(oaiId, searchRegion)
+	allBuckets := cfOps.GetRegionBuckets(oaiId, searchRegion)
+	var searchResults [][]string
+	for _, bucket := range allBuckets {
+		policy := cfOps.GetS3Policy(bucket, searchRegion)
+		if strings.Contains(policy, oaiId) {
+			item := []string{bucket, oaiId}
+			searchResults = append(searchResults, item)
+		}
+	}
+	if len(searchResults) > 0 {
+		outputResults(searchResults)
+	} else {
+		fmt.Printf("OAI: %s was not found in the %d S3 Buckets that were searched.", oaiId, len(allBuckets))
+	}
 }
