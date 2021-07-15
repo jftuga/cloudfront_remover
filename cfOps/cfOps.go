@@ -57,7 +57,7 @@ func GetDistributionData() [][]string {
 				origin = strings.Replace(origin,"origin-access-identity/cloudfront/", "", 1)
 			}
 		}
-		item := []string{*obj.Id, GetETag(*obj.Id), strconv.FormatBool(*obj.Enabled), *obj.Status, alias, origin, comment}
+		item := []string{*obj.Id, GetETag(*obj.Id), strconv.FormatBool(*obj.Enabled), *obj.Status, GetACMCert(*obj.Id), alias, origin, comment}
 		data = append(data, item)
 	}
 	return data
@@ -91,6 +91,94 @@ func GetOAIs() [][]string {
 			comment = *obj.Comment
 		}
 		item := []string{*obj.Id, GetOAIETag(*obj.Id), comment}
+		data = append(data, item)
+	}
+	return data
+}
+
+func DeleteFunc(name, etag string) string {
+	svc := cloudfront.New(session.New())
+	input := cloudfront.DeleteFunctionInput{}
+	input.Name = &name
+	input.IfMatch = &etag
+
+	_, err := svc.DeleteFunction(&input)
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			// FIXME: these case stmts are wrong
+			case cloudfront.ErrCodeInvalidArgument:
+				fmt.Println(cloudfront.ErrCodeInvalidArgument, aerr.Error())
+			default:
+				fmt.Println(aerr.Error())
+			}
+		} else {
+			// Print the error, cast err to awserr.Error to get the Code and
+			// Message from an error.
+			fmt.Println(err.Error())
+		}
+		return err.Error()
+	}
+	return ""
+}
+
+func GetFuncs() [][]string {
+	var data [][]string
+	svc := cloudfront.New(session.New())
+	input := &cloudfront.ListFunctionsInput{}
+
+	result, err := svc.ListFunctions(input)
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			// FIXME: these case stmts are wrong
+			case cloudfront.ErrCodeInvalidArgument:
+				fmt.Println(cloudfront.ErrCodeInvalidArgument, aerr.Error())
+			default:
+				fmt.Println(aerr.Error())
+			}
+		} else {
+			// Print the error, cast err to awserr.Error to get the Code and
+			// Message from an error.
+			fmt.Println(err.Error())
+		}
+		return [][]string{}
+	}
+
+	for _, obj := range result.FunctionList.Items {
+		name := "N/A"
+		if len(*obj.Name) > 0 {
+			name = *obj.Name
+		}
+		stage := "N/A"
+		if obj.FunctionMetadata.Stage != nil && len(*obj.FunctionMetadata.Stage) > 0 {
+			stage = *obj.FunctionMetadata.Stage
+		}
+
+		var input cloudfront.DescribeFunctionInput
+		input.Name = &name
+		input.Stage = &stage
+
+		result, err := svc.DescribeFunction(&input)
+		if err != nil {
+			if aerr, ok := err.(awserr.Error); ok {
+				switch aerr.Code() {
+				case cloudfront.ErrCodeNoSuchCloudFrontOriginAccessIdentity:
+					fmt.Println(cloudfront.ErrCodeNoSuchCloudFrontOriginAccessIdentity, aerr.Error())
+				case cloudfront.ErrCodeAccessDenied:
+					fmt.Println(cloudfront.ErrCodeAccessDenied, aerr.Error())
+				default:
+					fmt.Println(aerr.Error())
+				}
+			} else {
+				// Print the error, cast err to awserr.Error to get the Code and
+				// Message from an error.
+				fmt.Println(err.Error())
+			}
+			return [][]string{}
+		}
+
+		item := []string{name, stage, *result.ETag, result.FunctionSummary.FunctionMetadata.CreatedTime.String(), *result.FunctionSummary.FunctionConfig.Comment }
 		data = append(data, item)
 	}
 	return data
@@ -147,6 +235,37 @@ func GetETag(distributionId string) string {
 		return "N/A"
 	}
 	return *result.ETag
+}
+
+// GetACMCert - Check for a Viewer Certificate
+func GetACMCert(distributionId string) string {
+	svc := cloudfront.New(session.New())
+	input := &cloudfront.GetDistributionInput{}
+	input.SetId(distributionId)
+
+	result, err := svc.GetDistribution(input)
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			case cloudfront.ErrCodeNoSuchDistribution:
+				fmt.Println(cloudfront.ErrCodeNoSuchDistribution, aerr.Error())
+			case cloudfront.ErrCodeAccessDenied:
+				fmt.Println(cloudfront.ErrCodeAccessDenied, aerr.Error())
+			default:
+				fmt.Println(aerr.Error())
+			}
+		} else {
+			// Print the error, cast err to awserr.Error to get the Code and
+			// Message from an error.
+			fmt.Println(err.Error())
+		}
+		return "N/A"
+	}
+	cert := false
+	if result.Distribution.DistributionConfig.ViewerCertificate != nil {
+		cert = true
+	}
+	return strconv.FormatBool(cert)
 }
 
 func DeleteOAI(oaiId string) {
