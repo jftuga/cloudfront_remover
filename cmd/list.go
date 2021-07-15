@@ -45,7 +45,7 @@ func init() {
 
 func listAllDistributions() {
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"ID", "ETAG", "ENABLED", "STATUS", "1ST ALIAS", "1ST OAI", "COMMENT"})
+	table.SetHeader([]string{"ID", "ETAG", "ENABLED", "STATUS", "ACM CERT", "1ST ALIAS", "1ST OAI", "COMMENT"})
 	data := cfOps.GetDistributionData()
 	for _, entry := range data {
 		table.Append(entry)
