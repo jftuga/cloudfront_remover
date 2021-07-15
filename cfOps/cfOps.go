@@ -50,14 +50,11 @@ func GetDistributionData() [][]string {
 			comment = *obj.Comment
 		}
 
-		if comment == "terraform--codershowcase.com" {
-			fmt.Println("debug")
-		}
-
 		origin := "N/A"
 		if len(obj.Origins.Items) > 0 {
 			if obj.Origins.Items[0].S3OriginConfig != nil {
 				origin = *obj.Origins.Items[0].S3OriginConfig.OriginAccessIdentity
+				origin = strings.Replace(origin,"origin-access-identity/cloudfront/", "", 1)
 			}
 		}
 		item := []string{*obj.Id, GetETag(*obj.Id), strconv.FormatBool(*obj.Enabled), *obj.Status, alias, origin, comment}
