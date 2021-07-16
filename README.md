@@ -67,6 +67,11 @@ PS C:\> .\cloudfront_remover.exe listFuncs
 +---------------------+-------------+---------------+-----------------------------------+--------------------------------+
 ```
 
-## Acknowledgment
+## Acknowledgments
 * [AWS GoLang SDK](https://aws.amazon.com/sdk-for-go/)
 * [ASCII table in golang](github.com/olekukonko/tablewriter)
+
+## See Also
+* [cloudfront_remover](https://github.com/jftuga/terraform_cloudfront_builder)
+* * Disable and then delete AWS CloudFront Distributions and associated OAIs
+
